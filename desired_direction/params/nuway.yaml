@@ -1,0 +1,9 @@
+#
+/desired_speed: 2.5
+/angle_coe: 10
+/sample: 100
+/angle_tol: 40
+/dis_tol: 4.0
+/dis_invalid: 10.0
+/angle_invalid: 180
+/sleep_time: 0.04

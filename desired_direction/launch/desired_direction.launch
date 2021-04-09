@@ -1,0 +1,7 @@
+<launch>
+    <node pkg="desired_direction" type="desired_direction_new" name="desired_direction_new" output="screen">
+        <rosparam command="load" file="$(find desired_direction)/params/nuway.yaml" />
+    </node>
+
+
+</launch>
