@@ -13,6 +13,7 @@
 #include <visualization_msgs/Marker.h>
 #include <tf/tf.h>
 #include <nav_msgs/Path.h>
+#include <std_msgs/Bool.h>
 
 /*#define sample 300
 #define angle_tol 40
@@ -26,6 +27,7 @@ tf::Quaternion quat;
 std::vector<geometry_msgs::PoseStamped> global_path;
 //nav_msgs::Path global_path;
 int goal_pub_indi = 0, path_pub = 0, path_get = 0;
+double speed_coe = 1;
 
 void get_path(const nav_msgs::Path::Ptr& msg) {
     global_path = msg->poses;
@@ -61,6 +63,12 @@ void check_goal(const geometry_msgs::PoseStamped& msg) {
     return;
 }
 
+void get_soft_stop(const std_msgs::Bool& msg) {
+    if (msg.data == false) speed_coe = 1;
+    else speed_coe = 0;
+    return;
+}
+
 double velocity_direction(const double& waypoint_x, const double& waypoint_y, const double& vehicle_x, const double& vehicle_y, const double& vehicle_heading, double& real_angle) {
     double v1_x = waypoint_x - vehicle_x;
     double v1_y = waypoint_y - vehicle_y;
@@ -87,6 +95,7 @@ int main(int argc, char** argv) {
     ros::Subscriber feedback_sub = nh.subscribe ("move_base/feedback", 1, check_feedback);
     ros::Subscriber goal_sub = nh.subscribe ("move_base_simple/goal", 1, check_goal);
     ros::Subscriber path_sub = nh.subscribe ("move_base_node/PoseFollower/global_plan", 1, get_path);
+    ros::Subscriber soft_stop_sub = nh.subscribe ("safety_soft_stop", 1, get_soft_stop);
     ros::Publisher marker_pub = nh.advertise<visualization_msgs::Marker>("visualization_marker", 0);
     ros::Publisher goal_pub = nh.advertise<geometry_msgs::PoseStamped>("move_base_simple/goal", 1);
     ros::Publisher angle_pub = nh.advertise<geometry_msgs::Twist>("steering_angle", 1);
@@ -255,7 +264,7 @@ int main(int argc, char** argv) {
 			} else {
 			    printf("%lf\n",angle_diff);
 			    steering_angle.angular.z = angle_diff*angle_coe/190;
-			    steering_angle.linear.x = desired_speed_test;
+			    steering_angle.linear.x = desired_speed_test*speed_coe;
 			    angle_pub.publish(steering_angle);
 			}
 			sleep(sleep_time);
@@ -288,7 +297,7 @@ int main(int argc, char** argv) {
 			} else {
 			    printf("%lf\n",angle_diff);
 			    steering_angle.angular.z = angle_diff*angle_coe/190;
-			    steering_angle.linear.x = desired_speed_test;
+			    steering_angle.linear.x = desired_speed_test*speed_coe;
 			    angle_pub.publish(steering_angle);
 			}
 			sleep(sleep_time);
