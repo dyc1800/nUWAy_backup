@@ -13,7 +13,7 @@
 #include <visualization_msgs/Marker.h>
 #include <tf/tf.h>
 #include <nav_msgs/Path.h>
-#include <std_msgs/Bool.h>
+#include <std_msgs/Float64.h>
 
 /*#define sample 300
 #define angle_tol 40
@@ -63,9 +63,10 @@ void check_goal(const geometry_msgs::PoseStamped& msg) {
     return;
 }
 
-void get_soft_stop(const std_msgs::Bool& msg) {
-    if (msg.data == false) speed_coe = 1;
-    else speed_coe = 0;
+void get_soft_stop(const std_msgs::Float64& msg) {
+    /*if (msg.data == false) speed_coe = 1;
+    else speed_coe = 0;*/
+    speed_coe = msg.data;
     return;
 }
 
@@ -95,7 +96,7 @@ int main(int argc, char** argv) {
     ros::Subscriber feedback_sub = nh.subscribe ("move_base/feedback", 1, check_feedback);
     ros::Subscriber goal_sub = nh.subscribe ("move_base_simple/goal", 1, check_goal);
     ros::Subscriber path_sub = nh.subscribe ("move_base_node/PoseFollower/global_plan", 1, get_path);
-    ros::Subscriber soft_stop_sub = nh.subscribe ("safety_soft_stop", 1, get_soft_stop);
+    ros::Subscriber soft_stop_sub = nh.subscribe ("safety_soft_stop_scale", 1, get_soft_stop);
     ros::Publisher marker_pub = nh.advertise<visualization_msgs::Marker>("visualization_marker", 0);
     ros::Publisher goal_pub = nh.advertise<geometry_msgs::PoseStamped>("move_base_simple/goal", 1);
     ros::Publisher angle_pub = nh.advertise<geometry_msgs::Twist>("steering_angle", 1);
